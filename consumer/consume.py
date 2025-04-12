@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import os
 from typing import Dict, Any
 from aio_pika import connect, connect_robust, Message, IncomingMessage, Exchange, ExchangeType
 from models import User, Schedule, ScheduleItem, Slot, Menu, MenuItem, Dish
@@ -10,7 +11,9 @@ from crud import create_user, get_user_by_username, get_user_by_id, get_schedule
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-RABBITMQ_URL = "amqp://guest:guest@localhost/"
+host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+port = os.getenv("RABBITMQ_PORT", "5672")
+RABBITMQ_URL = f"amqp://guest:guest@{host}:{port}/"
 EXCHANGE_NAME = "stolovaya_exchange"
 
 async def process_register(message: Dict[str, Any]):
@@ -123,7 +126,7 @@ async def process_get_group_choices(message: Dict[str, Any]):
         return {"error": str(e)}
     finally:
         db.close()
-    return {"success": f"Выборы студентов группы {message["data"]["group"]} успешно получены"}
+    return {"success": f"Выборы студентов группы {message['data']['group']} успешно получены"}
 
 async def process_update_menu(message: Dict[str, Any]):
     db_gen = get_db()
