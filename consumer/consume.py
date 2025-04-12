@@ -6,7 +6,7 @@ from typing import Dict, Any
 from aio_pika import connect, connect_robust, Message, IncomingMessage, Exchange, ExchangeType
 from models import User, Schedule, ScheduleItem, Slot, Menu, MenuItem, Dish
 from db import get_db
-from crud import create_user, get_user_by_username, get_user_by_id, get_schedule_by_weekday, get_slot
+from crud import create_user, get_user_by_username, get_user_by_id, get_schedule_by_weekday, get_slot, get_group_head_by_group, get_slot_by_user_id
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -57,11 +57,20 @@ async def process_student_profile(message: Dict[str, Any]):
     user_id = message["data"]["user_id"]
     try:
         user = await get_user_by_id(db, user_id)
+        user = user.as_dict()
         del user["id"]
         del user["password"]
+
+        if user["having_meal"]:
+            group_head = await get_group_head_by_group(db, user["group"])
+            slot = await get_slot_by_user_id(db, group_head.id)
+            
+            user["meal_start"] = str(slot.start_time)
+            user["meal_end"] = str(slot.end_time)
+        return user
     finally:
         db.close()
-    return user
+
 
 async def process_confirm_meal(message: Dict[str, Any]):
     db = next(get_db())
@@ -70,7 +79,6 @@ async def process_confirm_meal(message: Dict[str, Any]):
         having_meal = message["data"]["having_meal"]
         
         user = await get_user_by_id(db, user_id)
-            
         user.having_meal = having_meal
         db.add(user) 
         db.commit()
