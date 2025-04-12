@@ -8,7 +8,7 @@ router = APIRouter(prefix="/student", tags=["student"])
 
 @router.get("/profile")
 async def get_profile(request: Request, current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "student":
+    if current_user["role"] not in ["student", "group_head"]:
         raise ForbiddenError("Access allowed only for students")
     
     try:
