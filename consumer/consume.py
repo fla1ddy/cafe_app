@@ -5,7 +5,7 @@ from typing import Dict, Any
 from aio_pika import connect, connect_robust, Message, IncomingMessage, Exchange, ExchangeType
 from models import User, Schedule, ScheduleItem, Slot, Menu, MenuItem, Dish
 from db import get_db
-from crud import create_user, get_user_by_username, get_user_by_id, get_schedule_by_weekday
+from crud import create_user, get_user_by_username, get_user_by_id, get_schedule_by_weekday, get_slot
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -81,8 +81,27 @@ async def process_confirm_meal(message: Dict[str, Any]):
         db.close()
 
 async def process_reserve_slot(message: Dict[str, Any]):
-    #резервируем слот для группы message["data"]["group"]
-    return {"success": f"Слот для группы {message["data"]["group"]} успешно зарезервирован"}
+    db_gen = get_db()
+    db = next(db_gen)
+    try:
+        slot = await get_slot(db, 
+                        message["data"]["weekday"],
+                        message["data"]["schedule_item_type"],
+                        message["data"]["slot_start_time"])
+        user_group = (await get_user_by_id(db, message["data"]["user_id"]))["group"]
+        slot.reserved_by = message["data"]["user_id"]
+        db.add(slot)
+        db.commit()
+        db.refresh(slot)
+
+        return {"success": f"Слот для группы {user_group} успешно зарезервирован"}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
+    finally:
+        db.close()
+
+    
 
 async def process_get_group_choices(message: Dict[str, Any]):
     db_gen = get_db()
