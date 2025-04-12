@@ -4,7 +4,7 @@
 git clone https://github.com/fla1ddy/cafe_app
 cd cafe_app/
 ```
-2\. Create .env file with this content:
+2. Create .env file with this content:
 ```
 SECRET_KEY=randomlettersandnumbers123
 ```
