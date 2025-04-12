@@ -3,6 +3,7 @@ import json
 import uuid
 import asyncio
 import logging
+import os
 from typing import Optional, Dict, Any
 from fastapi import Request
 
@@ -13,8 +14,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RabbitMQManager:
-    def __init__(self, url: str = "amqp://guest:guest@localhost/"):
-        self.url = url
+    def __init__(self, url: str = None):
+        if url is None:
+            host = os.getenv("RABBITMQ_HOST", "rabbitmq")
+            port = os.getenv("RABBITMQ_PORT", "5672")
+            self.url = f"amqp://guest:guest@{host}:{port}/"
+        else:
+            self.url = url
         self.connection: Optional[aio_pika.RobustConnection] = None
         self.channel: Optional[aio_pika.RobustChannel] = None
         self.exchange: Optional[aio_pika.Exchange] = None
