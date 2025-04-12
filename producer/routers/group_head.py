@@ -7,9 +7,7 @@ from producer.core.exceptions import InternalServerError
 router = APIRouter(prefix="/group_head", tags=["group_head"])
 
 @router.post("/reserve_slot")
-async def reserve_slot(request: Request, weekday: int, schedule_item_type: str, slot_start_time: str, current_user: dict = Depends(get_current_user)):
-    if current_user["role"] != "group_head":
-        raise ForbiddenError("Access allowed only for group_head")
+async def reserve_slot(request: Request, weekday: int, schedule_item_type: str, slot_start_time: str, current_user: dict = Depends(role_checker("group_head"))):
     try:
         message = {
             "action": "reserve_slot",
