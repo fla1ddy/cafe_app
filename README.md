@@ -8,25 +8,12 @@ cd cafe_app/
 ```
 SECRET_KEY=randomlettersandnumbers123
 ```
-3.
+3. To start
 ```bash
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+docker-compose up --build 
 ```
-4.
+4. To stop
 ```bash
-cd consumer/
-alembic revision --autogenerate -m "Make migrations"
-alembic upgrade head
-```
-5.
-```bash
-cd ..
-uvicorn producer.main:app --reload
-uvicorn consumer.main:app --reload --port 8080
-```
-6.
-```bash
-cd consumer/
-python consume.py
+docker-compose down -v
 ```
 
