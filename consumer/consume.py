@@ -53,7 +53,7 @@ async def process_student_profile(message: Dict[str, Any]):
     db = next(db_gen)
     user_id = message["data"]["user_id"]
     try:
-        user = await get_user_by_id(db, user_id).as_dict()
+        user = await get_user_by_id(db, user_id)
         del user["id"]
         del user["password"]
     finally:

@@ -10,7 +10,7 @@ async def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
 async def get_user_by_id(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
+    return db.query(User).filter(User.id == user_id).first().as_dict()
 
 async def get_schedule_by_weekday(db: Session, weekday: int):
     return db.query(Schedule).filter(Schedule.weekday == weekday).first()
