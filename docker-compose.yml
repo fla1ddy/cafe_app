@@ -25,7 +25,9 @@ services:
       retries: 5
 
   producer:
-    build: .
+    build: 
+      context: .
+      dockerfile: producer/Dockerfile
     ports:
       - "8000:8000"
     environment:
