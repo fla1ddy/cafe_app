@@ -73,4 +73,9 @@ class Dish(Base):
     menu_item_id = Column(Integer, ForeignKey("menu_items.id", ondelete="CASCADE"))
     menu_item = relationship("MenuItem", back_populates="dishes")
 
+class Image(Base):
+    __tablename__ = "images"
+
+    id = Column(Integer, primary_key=True, index=True)
+    object_name = Column(String, unique=True, index=True)
     
